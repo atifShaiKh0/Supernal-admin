@@ -46,15 +46,22 @@ const CollectionForm = () => {
       setLoading(true);
       const res = await fetch("/api/collections", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Set the appropriate headers
+        },
         body: JSON.stringify(values),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       if (res.ok) {
         setLoading(false);
         toast.success("Collection created");
         router.push("/collections");
       }
     } catch (err) {
-      console.log("[Collection post]", err);
+      setLoading(false);
+      console.log("[Collection in Form post]", err);
       toast.error("Someting went wrong! Please try again.");
     }
   };
