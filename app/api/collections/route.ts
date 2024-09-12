@@ -11,7 +11,7 @@ export const POST = async (req: NextRequest) => {
       return new NextResponse("Unauthorized ", { status: 403 });
     }
 
-    await connectToDB();
+    connectToDB();
 
     const { title, description, image } = await req.json();
 
