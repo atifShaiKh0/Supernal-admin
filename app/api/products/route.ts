@@ -12,7 +12,7 @@ export const POST = async (req: NextRequest) => {
     }
     await connectToDB();
 
-    const { title, description, media, collections, category, price } =
+    const { title, description, media, collections, category, tags, price } =
       await req.json();
 
     if (!title || !description || !media || !category || !price) {
@@ -27,6 +27,7 @@ export const POST = async (req: NextRequest) => {
       media,
       category,
       collections,
+      tags,
       price,
     });
 
@@ -36,5 +37,20 @@ export const POST = async (req: NextRequest) => {
   } catch (err) {
     console.log("[Products in Post in route : ", err);
     return new NextResponse("Internal error", { status: 500 });
+  }
+};
+
+export const GET = async (req: NextRequest) => {
+  try {
+    await connectToDB();
+
+    const products = await Product.find()
+      .sort({ createdAt: "desc" })
+      .populate({ path: "collections", model: Collection });
+
+    return NextResponse.json(products, { status: 200 });
+  } catch (error) {
+    console.log("Product_Route_GET : ", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 };

@@ -22,7 +22,7 @@ export const POST = async (req: NextRequest) => {
     }
 
     if (!title || !image) {
-      return new NextResponse("Title and image aer required", { status: 400 });
+      return new NextResponse("Title and image are required", { status: 400 });
     }
 
     const newCollection = await Collection.create({
@@ -43,8 +43,10 @@ export const POST = async (req: NextRequest) => {
 export const GET = async (req: NextRequest) => {
   try {
     await connectToDB();
+    console.log("Querying collections...");
 
     const collections = await Collection.find().sort({ createdAt: "desc" });
+
     return NextResponse.json(collections, { status: 200 });
   } catch (error) {
     console.log("[Collections_GET_In_Route]", error);
