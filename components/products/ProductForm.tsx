@@ -24,10 +24,11 @@ import toast from "react-hot-toast";
 import Delete from "../customUi/Delete";
 import MultiSelect from "../customUi/MultiSelect";
 import MultiText from "../customUi/MultiText";
+import Loader from "../customUi/Loader";
 
 const formSchema = z.object({
   title: z.string().min(2).max(20),
-  description: z.string().min(2).max(500).trim(),
+  description: z.string().min(2).max(1000).trim(),
   media: z.array(z.string()),
   category: z.string(),
   collections: z.array(z.string()),
@@ -42,12 +43,11 @@ interface ProductFormProps {
 const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const router = useRouter();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [collections, setCollections] = useState<CollectionType[]>([]);
 
   const getCollections = async () => {
     try {
-      setLoading(true);
       const res = await fetch("/api/collections", {
         method: "GET",
       });
@@ -68,7 +68,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
-      ? initialData
+      ? {
+          ...initialData,
+          collections: initialData.collections.map(
+            (collection) => collection._id
+          ),
+        }
       : {
           title: "",
           description: "",
@@ -117,7 +122,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
     }
   };
 
-  return (
+  console.log("initial DATa ", initialData);
+  console.log("collections ", collections);
+
+  return loading ? (
+    <Loader />
+  ) : (
     <div className="p-10">
       {initialData ? (
         <div className="flex items-center justify-between">
@@ -220,32 +230,35 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="collections"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Collections</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      placeholder="Collections"
-                      collections={collections}
-                      value={field.value}
-                      onChange={(_id) => field.onChange([...field.value, _id])}
-                      onRemove={(idToRemove) =>
-                        field.onChange([
-                          ...field.value.filter(
-                            (collectionId) => collectionId !== idToRemove
-                          ),
-                        ])
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {collections.length > 0 && (
+              <FormField
+                control={form.control}
+                name="collections"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Collections</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        placeholder="Collections"
+                        collections={collections}
+                        value={field.value}
+                        onChange={(_id) =>
+                          field.onChange([...field.value, _id])
+                        }
+                        onRemove={(idToRemove) =>
+                          field.onChange([
+                            ...field.value.filter(
+                              (collectionId) => collectionId !== idToRemove
+                            ),
+                          ])
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -276,9 +289,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
               Submit
             </Button>
             <Button
-              type="button"
+              type="button" // to avoid submit on enter button press
               className="bg-blue-1 text-white"
-              onClick={() => router.push("/collections")}
+              onClick={() => router.push("/products")}
             >
               Discard
             </Button>

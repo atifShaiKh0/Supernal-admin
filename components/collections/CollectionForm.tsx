@@ -26,7 +26,7 @@ import Delete from "../customUi/Delete";
 
 const formSchema = z.object({
   title: z.string().min(2).max(20),
-  description: z.string().min(2).max(500).trim(),
+  description: z.string().min(2).max(700).trim(),
   image: z.string(),
 });
 
@@ -91,7 +91,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
       {initialData ? (
         <div className="flex items-center justify-between">
           <p className="text-heading2-bold">Edit Collection</p>
-          <Delete id={initialData._id} />
+          <Delete item="collection" id={initialData._id} />
         </div>
       ) : (
         <p className="text-heading2-bold">Create Collections</p>
